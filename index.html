@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="An overview of the ASM CRM Beta Mac app: pages, features, how it works, sources and the GOAL data access review.">
+<title>ASM CRM Beta Overview</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23057be5'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+/* Tokens are the ASM CRM app's own (app/globals.css and app/pace.css): dark is the base, light follows the system.
+   One 1120px column: hero with an app sketch, then banded sections of bordered cards and tables. Sora headings, Outfit text. */
+:root{color-scheme:dark;
+  --ground:#080c10;--surface:#0d1117;--raised:#151a1e;
+  --line:rgba(148,163,184,.16);--line-strong:rgba(148,163,184,.32);
+  --ink:#fff;--ink-soft:#cbd5e1;--ink-muted:#94a3b8;
+  --brand:#057be5;--brand-text:#339fff;--on-brand:#fff;
+  --brand-tint:rgba(5,123,229,.10);--brand-tint-strong:rgba(5,123,229,.18);--brand-border:rgba(51,159,255,.4);
+  --amber:#f59e0b;--amber-tint:rgba(217,119,6,.16);--success:#22c55e;--success-tint:rgba(34,197,94,.14);
+  --danger:#f87171;--danger-tint:rgba(248,113,113,.14);--grid:rgba(148,163,184,.055);--glow:rgba(5,123,229,.17);
+  --glow-brand:0 0 28px -8px rgba(5,123,229,.55);
+  --fd:Sora,system-ui,sans-serif;--fs:Outfit,system-ui,sans-serif}
+@media (prefers-color-scheme:light){:root{color-scheme:light;
+  --ground:#f6f8fc;--surface:#fff;--raised:#ebf0f9;--line:#dbe2ec;--line-strong:#a9b5c5;
+  --ink:#001020;--ink-soft:#334155;--ink-muted:#475569;--brand-text:#0569c4;
+  --brand-tint:rgba(5,123,229,.07);--brand-tint-strong:rgba(5,123,229,.12);--brand-border:rgba(5,123,229,.35);
+  --amber:#a34a08;--amber-tint:rgba(180,83,9,.10);--success:#15803d;--success-tint:rgba(21,128,61,.10);
+  --danger:#b91c1c;--danger-tint:rgba(185,28,28,.09);--grid:rgba(0,16,32,.045);--glow:rgba(5,123,229,.10);
+  --glow-brand:0 0 24px -10px rgba(5,123,229,.45)}}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:64px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--ground);color:var(--ink-soft);font:400 16px/1.55 var(--fs);-webkit-font-smoothing:antialiased;overflow-x:clip}
+p,h1,h2,h3,ul,ol,dl,dd{margin:0}ul,ol{padding:0;list-style:none}a{color:var(--brand-text)}
+:focus-visible{outline:2px solid var(--brand-text);outline-offset:2px}
+.wrap{max-width:1152px;margin-inline:auto;padding-inline:16px}
+.top{border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:16px;flex-wrap:wrap}
+.wm{font:800 20px/24px var(--fd);color:var(--ink);letter-spacing:-.02em}.wm i{font-style:normal;color:var(--brand-text)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 12px/16px var(--fs);padding:4px 10px;border-radius:9999px;white-space:nowrap;justify-self:start}
+.c-blue{background:var(--brand-tint-strong);color:var(--brand-text)}.c-ok{background:var(--success-tint);color:var(--success)}
+.c-warn{background:var(--amber-tint);color:var(--amber)}.c-bad{background:var(--danger-tint);color:var(--danger)}.c-mute{background:var(--raised);color:var(--ink-muted)}
+nav.toc{border-bottom:1px solid var(--line);background:var(--ground);position:sticky;top:0;z-index:5}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+nav.toc a{flex:none;text-decoration:none;color:var(--ink-muted);font:500 14px/20px var(--fs);padding:8px 12px;border-radius:8px}
+nav.toc a:hover{background:var(--brand-tint);color:var(--ink)}
+.hero{background-image:radial-gradient(60% 70% at 78% 0%,var(--glow),transparent 70%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,48px 48px,48px 48px;border-bottom:1px solid var(--line)}
+.hero .wrap{padding-block:52px 44px;display:grid;gap:36px}
+.hero-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:36px;align-items:center}
+.hero h1{font:800 clamp(34px,5vw,52px)/1.04 var(--fd);letter-spacing:-.025em;color:var(--ink);text-wrap:balance}
+.hero h1 span{display:block;color:var(--brand-text)}
+.lead{font-size:18px;line-height:28px;color:var(--ink-muted);max-width:60ch;margin-top:18px}
+.cap{font:500 13px/16px var(--fs);color:var(--ink-muted)}
+.mock{background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;box-shadow:var(--glow-brand);overflow:hidden;font-size:13px;line-height:18px}
+.mbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--raised)}
+.mbar i{width:10px;height:10px;border-radius:99px;background:var(--line-strong);flex:none}
+.mnav{display:flex;gap:4px;flex-wrap:wrap;margin-left:8px}
+.mnav b{font-weight:500;color:var(--ink-muted);padding:3px 8px;border-radius:6px}.mnav b.on{background:var(--brand-tint-strong);color:var(--brand-text)}
+.mbody{padding:14px;display:grid;gap:10px}
+.msearch{border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-muted);display:flex;justify-content:space-between}
+.msearch kbd{font:500 12px var(--fs);background:var(--raised);border-radius:4px;padding:0 6px}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mcard{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:7px;align-content:start}
+.mcard>b{font:600 12px/16px var(--fs);color:var(--ink)}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:center;color:var(--ink-soft)}
+.mrow span:nth-child(2){text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-muted)}
+.meter{grid-column:1/-1;height:5px;border-radius:9px;background:var(--raised);overflow:hidden}.meter i{display:block;height:100%;background:var(--brand);border-radius:9px}
+.meter i.hot{background:var(--amber)}
+.mnote{font-size:12px;color:var(--ink-muted)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:8px;align-content:start}
+.stat b{font:800 clamp(32px,4vw,48px)/1 var(--fd);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat b i{font-style:normal;color:var(--brand-text);font-size:.46em;letter-spacing:0;margin-left:5px}
+.stat span{font-size:14px;line-height:20px;color:var(--ink-muted)}
+.stat.hot{border-color:var(--brand-border);background:linear-gradient(var(--brand-tint),var(--brand-tint)),var(--surface);box-shadow:var(--glow-brand)}
+.sec .wrap{padding-block:52px;display:grid;gap:28px}
+.sec+.sec .wrap{border-top:1px solid var(--line)}
+.head{display:grid;gap:12px;max-width:780px}
+.head h2{font:800 clamp(26px,3.4vw,38px)/1.08 var(--fd);letter-spacing:-.025em;color:var(--ink);text-wrap:balance}
+.head h2 span{display:block;color:var(--ink-muted)}
+.head p{color:var(--ink-muted);font-size:17px;line-height:26px}
+h3{font:700 18px/26px var(--fd);color:var(--ink);letter-spacing:-.01em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;display:grid;gap:10px;align-content:start}
+.card p{font-size:15px;line-height:23px}
+.card.blue{border-color:var(--brand-border);box-shadow:var(--glow-brand)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.muted{color:var(--ink-muted)}.small{font-size:14px;line-height:21px}
+.pg{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.k{font:600 12px/18px var(--fs);color:var(--brand-text);background:var(--brand-tint-strong);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.k.g{color:var(--ink-muted);background:var(--raised)}
+.bul{display:grid;gap:8px}.bul li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:10px;font-size:15px;line-height:22px}
+.bul li::before{content:"";width:6px;height:6px;border-radius:9px;background:var(--brand);margin:8px 0 0 4px}
+.bul.ok li::before{background:var(--success)}
+.bul.warn li::before{background:transparent;border:2px solid var(--amber);width:8px;height:8px;margin:7px 0 0 3px}
+.bul small{display:block;color:var(--ink-muted);font-size:13px;line-height:19px}
+.subcap{display:flex;align-items:center;gap:10px;font:700 15px/22px var(--fd);color:var(--ink)}
+.subcap::after{content:"";flex:1;height:1px;background:var(--line)}
+.terms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px}
+.terms div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-top:1px solid var(--line);font-size:15px;line-height:22px}
+.terms dt{font-weight:600;color:var(--ink)}.terms dd{color:var(--ink-soft)}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) 76px minmax(0,1.1fr) 76px minmax(0,1.2fr);align-items:stretch}
+.zone{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:10px;align-content:start}
+.zone.mid{border-color:var(--brand-border);box-shadow:var(--glow-brand)}
+.zone .cap{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:99px;background:var(--brand);flex:none}
+.node{background:var(--raised);border-radius:8px;padding:10px 12px;font-size:14px;line-height:20px;display:grid;gap:2px}
+.node b{font-weight:600;color:var(--ink)}.node span{color:var(--ink-muted)}
+.node.never{background:transparent;border:1px dashed var(--line-strong)}
+.down{justify-self:center;color:var(--brand-text);width:12px;height:16px}
+.pipe{display:grid;align-content:center;justify-items:center;gap:6px;padding:8px 6px;text-align:center}
+.pipe span{font:500 12px/15px var(--fs);color:var(--ink-muted)}
+.pipe svg{width:52px;height:12px;color:var(--brand-text)}
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;font-size:15px;line-height:23px;counter-increment:s}
+.steps li::before{content:counter(s);font:700 15px/28px var(--fd);width:28px;height:28px;border-radius:8px;background:var(--brand-tint-strong);color:var(--brand-text);text-align:center}
+.steps b,.vs b,.legend b{color:var(--ink);font-weight:600}
+.callout{border:1px solid var(--brand-border);background:var(--brand-tint);border-radius:12px;padding:18px 20px;display:grid;gap:6px;font-size:15px;line-height:23px;align-content:start}
+.callout b{color:var(--ink);font-weight:600}
+.src .card{gap:12px}
+.badge{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font:800 16px var(--fd);color:var(--brand-text);background:var(--brand-tint-strong);border:1px solid var(--brand-border)}
+.src dl{display:grid;gap:8px;font-size:14px;line-height:20px}
+.src dt{font-weight:600;color:var(--ink)}.src dd{color:var(--ink-muted)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;line-height:22px}
+.tbl th{text-align:left;font:500 13px/16px var(--fs);color:var(--ink-muted);padding:14px 18px}
+.tbl td{padding:13px 18px;border-top:1px solid var(--line);vertical-align:top}
+.tbl td:first-child{color:var(--ink);font-weight:500}
+.tbl .n{font:700 15px/22px var(--fd);color:var(--brand-text);width:44px}
+.vs{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;padding:14px 0;border-top:1px solid var(--line);font-size:15px;line-height:23px}
+.vs:first-child{border-top:0;padding-top:0}
+.vs q{quotes:none;color:var(--ink-muted);font-style:italic}
+.risk{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px;align-items:start}
+.matrix{display:grid;grid-template-columns:62px repeat(3,minmax(0,1fr));gap:8px}
+.matrix .ax{font:500 12px/14px var(--fs);color:var(--ink-muted);display:grid;place-items:center;text-align:center}
+.cell{border-radius:8px;min-height:68px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:8px}
+.t1{background:var(--success-tint)}.t2{background:var(--amber-tint)}.t3{background:var(--danger-tint)}
+.mk{min-width:34px;height:34px;padding:0 8px;border-radius:9999px;background:var(--surface);border:1px solid var(--brand-border);color:var(--brand-text);font:700 14px/32px var(--fd);text-align:center;flex:none;display:inline-block}
+.legend{display:grid;gap:14px}
+.legend li{display:grid;grid-template-columns:46px minmax(0,1fr);gap:12px;align-items:start;font-size:15px;line-height:22px}
+.scn{gap:14px}
+.scn-h{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
+.scn-h h3{flex:1 1 300px}
+details.more{border:1px solid var(--line);border-radius:10px;background:var(--ground);overflow:hidden}
+details.more summary{cursor:pointer;padding:12px 16px;font:600 14px/20px var(--fs);color:var(--brand-text);list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"Show";color:var(--ink-muted);font-weight:500}
+details.more[open] summary::after{content:"Hide"}
+details.more .scroll{border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.next{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:n}
+.next li{counter-increment:n;background:var(--surface);border:1px solid var(--brand-border);border-radius:12px;padding:20px;display:grid;gap:10px;align-content:start;font-size:15px;line-height:23px}
+.next li::before{content:counter(n);font:800 30px/1 var(--fd);color:var(--brand-text)}
+.next b{color:var(--ink);font-weight:600}
+footer .wrap{padding-block:28px 40px;border-top:1px solid var(--line);display:grid;gap:6px;font-size:13px;line-height:20px;color:var(--ink-muted)}
+@media(max-width:920px){
+  .hero-top,.risk{grid-template-columns:minmax(0,1fr)}
+  .stats,.grid4,.next{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .pipe{grid-auto-flow:column;justify-content:center;align-items:center;gap:12px;padding:10px 0}
+  .pipe svg{transform:rotate(90deg);width:36px}
+  .grid3,.terms{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:640px){
+  .grid2,.grid4,.steps,.next,.mgrid{grid-template-columns:minmax(0,1fr)}
+  .sec .wrap{padding-block:40px}.card{padding:20px}
+  .terms div{grid-template-columns:minmax(0,1fr);gap:2px}
+  .vs{grid-template-columns:minmax(0,1fr);gap:6px}.vs.vh{display:none}
+  .tbl{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-top:1px solid var(--line)}
+  .stack tr:first-child{border-top:0}
+  .stack td{display:flow-root;border:0;padding:3px 16px 3px 8.5em;text-align:start}
+  .stack td::before{content:attr(data-l);float:left;width:7.5em;margin-left:-7.8em;color:var(--ink-muted);font-size:13px;font-weight:400}
+  .stack td:empty{display:none}
+}
+@media print{nav.toc{position:static}.sec,.card{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+<span class="wm">ASM CRM <i>Beta</i></span>
+<div class="chips"><span class="chip c-mute">Product Overview</span><span class="chip c-blue">18 Nov 2026</span></div>
+</div></header>
+
+<nav class="toc" aria-label="Sections"><div class="wrap">
+<a href="#overview">Overview</a><a href="#pages">Pages</a><a href="#features">Features</a><a href="#how">How It Works</a><a href="#sources">Sources</a><a href="#access">Data Access</a><a href="#risks">Risks</a><a href="#fixes">Fixes</a><a href="#next">Next Steps</a>
+</div></nav>
+
+<main>
+<section class="hero" id="overview"><div class="wrap">
+<div class="hero-top">
+<div>
+<span class="cap">A Mac App For GOAL Account Managers</span>
+<h1>Every Account On One Page.<span>Pace Checked Every 5 Minutes.</span></h1>
+<p class="lead">ASM CRM is a private Mac app for a GOAL account manager. It joins GOAL performance with Notion, Close and Fathom, so an account manager can look up any account in seconds and catch budget and conversion problems the same day they start.</p>
+</div>
+<div class="mock" aria-label="Sketch of the ASM CRM Home screen" role="img">
+<div class="mbar"><i></i><i></i><i></i><div class="mnav"><b class="on">Home</b><b>My Accounts</b><b>Pipeline</b><b>This Week</b><b>Pace</b></div></div>
+<div class="mbody">
+<div class="msearch"><span>Search any GOAL account</span><kbd>⌘K</kbd></div>
+<div class="mgrid">
+<div class="mcard"><b>Near Or At Budget</b>
+<div class="mrow"><span>Sample Agency A</span><span>96%</span><span class="meter"><i class="hot" style="width:96%"></i></span></div>
+<div class="mrow"><span>Sample Agency B</span><span>88%</span><span class="meter"><i class="hot" style="width:88%"></i></span></div></div>
+<div class="mcard"><b>Behind Pace Today</b>
+<div class="mrow"><span>Sample Agency C</span><span>31%</span><span class="meter"><i style="width:31%"></i></span></div>
+<div class="mrow"><span>Sample Agency D</span><span>42%</span><span class="meter"><i style="width:42%"></i></span></div></div>
+<div class="mcard"><b>Best Click-To-Lead, 14 Days</b>
+<div class="mrow"><span>Sample Agency E</span><span>14.2%</span></div><div class="mrow"><span>Sample Agency F</span><span>11.8%</span></div></div>
+<div class="mcard"><b>New This Week, Onboarding</b>
+<div class="mrow"><span>Sample Agency G</span><span>Mon</span></div><div class="mrow"><span>Sample Agency H</span><span>Tue</span></div></div>
+</div>
+<span class="mnote">Illustration with made-up agencies, as in the app's sample-data mode.</span>
+</div></div>
+</div>
+<div class="stats">
+<div class="stat"><b>5<i>min</i></b><span>Between pace checks on every Active account, by default</span></div>
+<div class="stat"><b>4</b><span>Primary sources joined per account: GOAL, Notion, Close, Fathom</span></div>
+<div class="stat hot"><b>0</b><span>Lead records requested from GOAL. Totals only.</span></div>
+<div class="stat"><b>1</b><span>Kind of change it can make in GOAL, a source bid. Switched off.</span></div>
+</div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+<div class="head"><h2>Two Jobs, One App.<span>Account Lookup And Pace.</span></h2>
+<p>It runs entirely on the account manager's own Mac, as a small native window. Nothing is hosted, and there is no cloud copy.</p></div>
+<div class="grid2">
+<div class="card blue"><span class="chip c-blue">Job 1 · Account Lookup</span><h3>Any Account, One Page</h3>
+<p>Search any GOAL account and get its status, contacts, meetings, tasks, notes, the last meeting's recap, the sales handoff and the reporting site. Ask questions about one account or the whole book.</p></div>
+<div class="card blue"><span class="chip c-blue">Job 2 · Pace</span><h3>Same-Day Warning On Spend And Conversion</h3>
+<p>Budget pace and click-to-lead checks every 5 minutes, with alerts, a morning briefing, best hours and a Sources review. Pace is the engine of the Croissant Chrome extension (v2.9.2), now running inside the app.</p></div>
+</div>
+<div class="subcap">Terms Used On This Page</div>
+<dl class="terms">
+<div><dt>Account manager (AM)</dt><dd>The GOAL rep who looks after a book of agency accounts. Each copy of the app shows one AM's book.</dd></div>
+<div><dt>Pace</dt><dd>How much of today's budget an account has spent, against where it normally is by this time of day.</dd></div>
+<div><dt>Click-to-lead</dt><dd>The share of clicks that become leads. A sudden drop often means a broken form, landing page or call routing.</dd></div>
+<div><dt>GOAL sign-in</dt><dd>The AM's own logged-in session on the GOAL admin portal. It lasts 12 hours. It is not an API key.</dd></div>
+<div><dt>"Log in as"</dt><dd>The GOAL admin feature that opens a client's account as its owner, with no client password. The app uses it to read budgets.</dd></div>
+<div><dt>GOAL Connector</dt><dd>A small Chrome extension that passes the sign-in from the GOAL page to the app on the same Mac.</dd></div>
+<div><dt>Source bid multiplier</dt><dd>The bid adjustment for one traffic source on a campaign. It is the only thing the app can change in GOAL.</dd></div>
+<div><dt>Quote Funnel, Lead Marketplace</dt><dd>GOAL's two campaign types. Quote Funnel budgets are in dollars. Marketplace limits are in units.</dd></div>
+</dl>
+</div></section>
+
+<section class="sec" id="pages"><div class="wrap">
+<div class="head"><h2>The Main Pages.<span>What An AM Sees In The App.</span></h2>
+<p>Seven pages sit in the top nav. Every account has its own page, and the rest open from inside Pace.</p></div>
+<div class="subcap">Account Management</div>
+<div class="grid3">
+<div class="card"><div class="pg"><h3>Home</h3><span class="k">Top Nav</span></div><p>Search, plus a dashboard: accounts near or at budget, accounts behind today, the best click-to-lead accounts over 14 days, and new accounts this week that are still onboarding.</p></div>
+<div class="card"><div class="pg"><h3>My Accounts</h3><span class="k">Top Nav</span></div><p>Every account grouped Active, Onboarding, Paused and Inactive. Shown as a table or a board of cards, with the card properties chosen by the AM.</p></div>
+<div class="card blue"><div class="pg"><h3>Account Page</h3><span class="k g">One Per Account</span></div><p>Status, carrier, state, contacts, next and last meeting, open tasks, recent notes, meeting recap, handoff, reporting site and today's pace, with links out to GOAL, Close and Notion.</p></div>
+<div class="card"><div class="pg"><h3>Expansion Pipeline</h3><span class="k">Top Nav</span></div><p>The AM's opportunities in Close's Expansion pipeline, one column per stage. Read-only. Deals are moved in Close.</p></div>
+<div class="card"><div class="pg"><h3>This Week</h3><span class="k">Top Nav</span></div><p>Today's account meetings (onboardings and reviews) and the rest of the week's, from the AM's calendar.</p></div>
+<div class="card"><div class="pg"><h3>Setup</h3><span class="k g">⌘,</span></div><p>Each source shows whether it is ready. The app works with whatever is connected and shows sample accounts until Notion is.</p></div>
+</div>
+<div class="subcap">Pace</div>
+<div class="grid3">
+<div class="card"><div class="pg"><h3>Pace</h3><span class="k">Top Nav</span></div><p>Every Active account's spend against budget, leads, calls and click-to-lead, refreshed on each check. Open an account to see every Quote Funnel and Lead Marketplace campaign.</p></div>
+<div class="card"><div class="pg"><h3>Daily Briefing</h3><span class="k">Top Nav</span></div><p>The 8am digest: yesterday's spend, leads, calls and budget hits, what needs a look today, accounts on track to hit budget early, and last week's bid changes.</p></div>
+<div class="card"><div class="pg"><h3>Alerts</h3><span class="k">Top Nav</span></div><p>The latest 300 alerts with an unread count, plus optional macOS notifications and Slack posts. Mute silences one account until tomorrow.</p></div>
+<div class="card"><div class="pg"><h3>Best Hours</h3><span class="k g">Inside Pace</span></div><p>The hours each account converts best and worst, over 14 or 28 days, all days, weekdays or weekends. Insight for client conversations. It changes nothing.</p></div>
+<div class="card"><div class="pg"><h3>Sources Review</h3><span class="k g">Inside Pace</span></div><p>Opens from a conversion flag. Per campaign and source: today's clicks, leads and spend, the 14-day conversion rate and the current bid multiplier.</p></div>
+<div class="card"><div class="pg"><h3>Pace Settings</h3><span class="k g">Inside Pace</span></div><p>The GOAL connection, alert sensitivity, briefing time, Slack, the bid-change switch (off), and clearing stored data.</p></div>
+</div>
+<div class="callout"><b>Two palettes work on every page.</b><span><b>⌘K</b> searches any account, with typo and nickname matching. <b>⌘J</b> opens Ask, about the open account or the whole book.</span></div>
+</div></section>
+
+<section class="sec" id="features"><div class="wrap">
+<div class="head"><h2>Core Features.<span>What It Does For The AM.</span></h2></div>
+<div class="grid2">
+<div class="card"><h3>Pace Alerts</h3><ul class="bul">
+<li>100% of budget, the moment it happens</li>
+<li>25, 50 and 75% milestones, rolled up hourly</li>
+<li>On track to hit budget before noon</li>
+<li>No spend or underpacing against the account's normal rhythm</li>
+<li>Conversion problems: a long run of clicks with no leads, or a big same-day drop</li>
+<li>A 5pm recap, plus a notice if checks fail or the GOAL sign-in lapses</li></ul></div>
+<div class="card"><h3>Morning Briefing</h3><ul class="bul">
+<li>One alert at 8am (adjustable)</li>
+<li>Yesterday's spend, leads, calls and bright spots</li>
+<li>Who hit budget, earliest first</li>
+<li>Needs a look today: no spend, behind pace, conversion flags with a Sources link</li>
+<li>Bid changes from the last week</li></ul></div>
+<div class="card"><h3>Ask</h3><p>Plain-language questions about one account or all of them. Answers draw on GOAL pace, Notion notes and tasks, Close, Fathom call search and email, using Claude.</p></div>
+<div class="card"><h3>Handoff And Meeting Recaps</h3><p>Pulls the Close ASM Handoff Sheet and the won opportunity, and picks integrations, logo, targeting and filters out of the free text. Shortens the last Fathom meeting into a recap.</p></div>
+<div class="card"><h3>Sources Review And Bid Increases</h3><p>Built to raise source bids an AM approves after a conversion flag. Raises only, 10% per change, 25 points at most, never above 300, a 7-day wait per source, every change logged.</p><span class="chip c-warn">Switched Off. Apply Cannot Run Yet.</span></div>
+<div class="card"><h3>Exports And Sample Mode</h3><p>Pace exports to CSV and saves a daily report of yesterday's numbers. A sample-data mode with made-up agencies lets anyone demo every screen with no GOAL login.</p></div>
+</div>
+<div class="callout"><b>It sends nothing to clients.</b><span>The app sends and drafts nothing to clients. The only messages it sends are alerts to the AM and, if set up, posts to the AM's own Slack.</span></div>
+</div></section>
+
+<section class="sec" id="how"><div class="wrap">
+<div class="head"><h2>How It Works.<span>From The AM's GOAL Login To The Numbers On Screen.</span></h2>
+<p>Everything runs on the AM's own Mac. There is no server of ours in the middle. The app talks to each system with the AM's own sign-ins and keys, and it can be reached only from that Mac.</p></div>
+<div class="flow">
+<div class="zone"><span class="cap"><i class="dot"></i>Chrome On This Mac</span>
+<div class="node"><b>GOAL Admin Portal</b><span>The AM logs in as they do today. GOAL keeps the sign-in in the page.</span></div>
+<svg class="down" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0v13M1.5 9.5 6 14l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="node"><b>GOAL Connector</b><span>A small Chrome extension. It reads the sign-in once a minute and passes it on when it changes, with budgets and source settings GOAL loads while the AM browses.</span></div></div>
+<div class="pipe"><span>Sign-in, to this Mac only</span><svg viewBox="0 0 56 12" aria-hidden="true"><path d="M1 6h52M48 1.5 53 6l-5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="zone mid"><span class="cap"><i class="dot"></i>ASM CRM On This Mac</span>
+<div class="node"><b>Encrypted Store</b><span>The sign-in, up to 45 days of numbers, and alerts.</span></div>
+<div class="node"><b>Pace Engine</b><span>Checks every 5 minutes by default. Compares spend with budget and history, then raises alerts.</span></div>
+<div class="node"><b>Write Block</b><span>While the bid switch is off, it refuses every change to GOAL. The switch is off.</span></div></div>
+<div class="pipe"><span>Read requests, signed with the AM's sign-in</span><svg viewBox="0 0 56 12" aria-hidden="true"><path d="M1 6h52M48 1.5 53 6l-5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="zone"><span class="cap"><i class="dot"></i>GOAL's API</span>
+<div class="node"><b>Analytics Totals</b><span>Spend, clicks, lead counts and call counts by account and campaign. At least two requests per check.</span></div>
+<div class="node"><b>Account List And History</b><span>The account list every hour. 14 days of totals once a day.</span></div>
+<div class="node"><b>Log In As The Owner</b><span>To read budgets, Marketplace totals and source settings. No client password is used.</span></div>
+<div class="node never"><b>Lead Records</b><span>Never requested.</span></div></div>
+</div>
+
+<div class="grid4">
+<div class="card"><span class="cap">Which Accounts</span><h3>One AM's Book</h3><p>Accounts that are Active in GOAL with that AM as Account Manager. Onboarding and Paused accounts are read by name only.</p></div>
+<div class="card"><span class="cap">What It Reads</span><h3>Totals, Not Leads</h3><p>Spend, clicks, lead counts, call counts and budgets. No individual leads, so no consumer PII comes into the app.</p></div>
+<div class="card"><span class="cap">How Often</span><h3>Every 5 Minutes</h3><p>Today's totals on each check. The account list hourly. Budgets and history once a day.</p></div>
+<div class="card"><span class="cap">How Long</span><h3>A 12-Hour Pass</h3><p>The sign-in expires after 12 hours. The app then shows disconnected until a GOAL page is open again.</p></div>
+</div>
+
+<div class="subcap">How It Pulls GOAL Data For One AM's Accounts</div>
+<ol class="steps">
+<li><span><b>The AM logs in</b> to the GOAL admin portal in Chrome, as they do now.</span></li>
+<li><span><b>The Connector hands over the sign-in.</b> It pairs with the app on the same Mac and keeps the sign-in for the browser session only. The app saves it in an encrypted file.</span></li>
+<li><span><b>The app works out who the AM is</b> from the sign-in, then asks GOAL for accounts that are Active with that AM as Account Manager. It is the same list as the admin Clients page filtered to Active and that AM.</span></li>
+<li><span><b>Onboarding and Paused accounts</b> are read by name only, so they link to their pages before launch. They show no pace numbers and raise no alerts until Active.</span></li>
+<li><span><b>Every 5 minutes, or on Refresh,</b> it sends at least two analytics requests for today's totals. Some checks add Marketplace, source and hourly reads.</span></li>
+<li><span><b>Every hour it re-reads the account list,</b> and once a day it pulls 14 days of history.</span></li>
+<li><span><b>Once a day it reads budgets,</b> on the first check after midnight Pacific. It signs in as each account's owner, as "log in as" does, reads the active campaigns' budgets and changes nothing. The owner session stays in memory and is never saved. Failed reads retry 15, 30, 60 and 120 minutes later.</span></li>
+<li><span><b>It compares spend with budget and history,</b> updates the screen and raises alerts. After 12 hours the sign-in expires and the app shows disconnected until a GOAL page is open again.</span></li>
+</ol>
+
+<div class="subcap">What Else The App Talks To</div>
+<div class="grid4">
+<div class="card"><h3>CRM Reads</h3><p class="muted">Notion, Close, Fathom and email, through the AM's own connections. Read-only.</p></div>
+<div class="card"><h3>Anthropic</h3><p class="muted">Meeting notes are summarised there when an account is opened. Ask questions go with the data needed, which can include account names, numbers and contact details.</p></div>
+<div class="card"><h3>TypeSafe</h3><p class="muted">A second AI service, behind Jev. It gets Ask questions plus the list of account and contact names. No pace numbers.</p></div>
+<div class="card"><h3>Slack</h3><p class="muted">Alert posts, only if the AM adds a webhook. Off by default.</p></div>
+</div>
+<div class="grid2">
+<div class="callout"><b>Accounts are joined automatically.</b><span>A links file maps each Notion account to its Close lead, its Account Mgmt folder and its reporting folder, matched by name first and then by Jev. GOAL accounts link by the owner's email, and any account can be linked by hand.</span></div>
+<div class="callout"><b>The one thing it can change in GOAL.</b><span>A source bid multiplier, when the AM ticks it on a Sources review, confirms the list and clicks Apply. The switch is off by default, and while it is off every write to GOAL is refused. It never changes budgets, base bids or daily limits.</span></div>
+</div>
+</div></section>
+
+<section class="sec" id="sources"><div class="wrap">
+<div class="head"><h2>Where The Information Comes From.<span>Four Primary Sources, Each For What It Owns.</span></h2>
+<p>Every source is read with the AM's own access. The app never writes to Close, Notion, Fathom, email or the calendar.</p></div>
+<div class="grid4 src">
+<div class="card blue"><div class="badge">G</div><h3>GOAL</h3><dl>
+<dt>Connects through</dt><dd>The AM's admin sign-in, via the GOAL Connector</dd>
+<dt>Provides</dt><dd>Spend, clicks, lead and call counts, budgets, campaigns, Marketplace totals, source settings and bid multipliers</dd>
+<dt>Refresh</dt><dd>Every 5 minutes. List hourly. Budgets daily.</dd></dl></div>
+<div class="card"><div class="badge">N</div><h3>Notion</h3><dl>
+<dt>Connects through</dt><dd>Setup, Connect Notion (sign in and approve)</dd>
+<dt>Provides</dt><dd>The account list, status, carrier, state, contacts, tasks, the two newest notes, reporting links, and meetings via Notion Calendar</dd>
+<dt>Role</dt><dd>The account record of truth</dd></dl></div>
+<div class="card"><div class="badge">C</div><h3>Close</h3><dl>
+<dt>Connects through</dt><dd>The AM's Close API key</dd>
+<dt>Provides</dt><dd>City, website, extra contacts, the ASM Handoff Sheet, proposal and agreement, the Expansion pipeline, new won deals</dd>
+<dt>Also</dt><dd>Adds accounts confirmed as the AM's that are not in Notion yet, marked "Close only"</dd></dl></div>
+<div class="card"><div class="badge">F</div><h3>Fathom</h3><dl>
+<dt>Connects through</dt><dd>The AM's Fathom API key</dd>
+<dt>Provides</dt><dd>The last meeting's notes and Ask's call search</dd>
+<dt>Fallback</dt><dd>The copy synced into Close, then Notion's meeting page</dd></dl></div>
+</div>
+<div class="subcap">Supporting Sources</div>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>Source</th><th>What It Adds</th><th>Connects Through</th></tr></thead>
+<tbody>
+<tr><td>Google Calendar</td><td>Next and last meeting, and the This Week page, matched by attendee email, agency domain or name</td><td>Notion Calendar</td></tr>
+<tr><td>Superhuman</td><td>Email, for Ask</td><td>Setup, Connect Superhuman</td></tr>
+<tr><td>Claude (Anthropic)</td><td>Ask, handoff extraction, short meeting recaps</td><td>API key</td></tr>
+<tr><td>Jev (TypeSafe)</td><td>Typo and nickname search, linking leftover folders and leads, Ask routing</td><td>API key</td></tr>
+<tr><td>Reporting folders</td><td>The "updated" date, from the newest file in each account's reporting folder</td><td>Local files</td></tr>
+<tr><td>Slack</td><td>Optional alert posts to the AM's own channel. Off by default.</td><td>Webhook</td></tr>
+</tbody></table></div>
+<div class="subcap">Where Each Thing On Screen Comes From</div>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>On Screen</th><th>Source</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Pace, budgets, alerts, best hours</td><td>GOAL</td><td>Analytics totals for the AM's Active accounts</td></tr>
+<tr><td>Account list, status, carrier, state</td><td>Notion</td><td>HQ › Client Account</td></tr>
+<tr><td>Contacts</td><td>Notion, Close</td><td>Notion Contacts, plus extra contacts on the Close lead</td></tr>
+<tr><td>City, website</td><td>Close</td><td>Website falls back to the agency's email domain</td></tr>
+<tr><td>Next and last meeting, This Week</td><td>Google Calendar</td><td>Through Notion Calendar</td></tr>
+<tr><td>To-do and in progress</td><td>Notion</td><td>Notion Tasks</td></tr>
+<tr><td>Notes</td><td>Notion</td><td>The two newest notes</td></tr>
+<tr><td>Meeting recap</td><td>Fathom</td><td>Close, then Notion, as backups. Shortened by Claude.</td></tr>
+<tr><td>Sales handoff</td><td>Close, Notion</td><td>ASM Handoff Sheet and won opportunity, plus onboarding notes</td></tr>
+<tr><td>Expansion Pipeline</td><td>Close</td><td>The AM's opportunities, by stage</td></tr>
+</tbody></table></div>
+</div></section>
+
+<section class="sec" id="access"><div class="wrap">
+<div class="head"><h2>How The App Reads GOAL Data.<span>What It Touches. What Is Exposed.</span></h2>
+<p>From the data access review of 11 Nov 2026. An independent check of the code confirmed or corrected each claim, with one live test session.</p></div>
+<div class="subcap">The Short Version</div>
+<div class="grid3">
+<div class="card"><h3>It Has No Access Of Its Own</h3><p>The app borrows the GOAL admin sign-in of whoever is logged in to the admin portal in Chrome on that Mac. Without an admin login it gets nothing.</p></div>
+<div class="card"><h3>The Sign-In Is A 12-Hour Pass</h3><p>GOAL's own admin site keeps it in the browser. It is the AM's login session, and it expires. It is not a permanent API key.</p></div>
+<div class="card"><h3>The App Asks For Totals Only</h3><p>Spend, clicks, lead counts, call counts and budgets for one AM's accounts. It never asks for individual leads, so no consumer PII comes into the app.</p></div>
+<div class="card"><h3>The Sign-In Can Do More Than The App Does</h3><p>It is not limited to one AM's accounts, and it can sign in as any client's owner without their password. The app does that to read budgets. Misused outside the app, the sign-in could reach whatever a client sees in their portal.</p></div>
+<div class="card"><h3>The Method Came From Croissant</h3><p>The Croissant team build (v2.9.2) reads the same sign-in and signs in as account owners the same way. It keeps the sign-in unencrypted in Chrome and has fewer checks around bid changes.</p></div>
+<div class="card"><h3>The Real Exposure Is The Admin Login</h3><p>Any admin user with an AI coding tool can do what this app does. The app adds a local copy of the data, a faster way to pull it, and a small local service on the Mac that needs a few more locks.</p></div>
+</div>
+<div class="callout"><b>Most fixes add no steps for the user.</b><span>Several make the app simpler. The strongest ones are on the GOAL side and would close the gap for every tool, not only this one.</span></div>
+
+<div class="subcap">What The Sign-In Can Reach, And The Smaller Part The App Uses</div>
+<div class="grid2">
+<div class="card blue"><span class="chip c-ok">What The App Uses</span><ul class="bul ok">
+<li><span>Analytics totals for one AM's accounts<small>The AM number comes from the sign-in.</small></span></li>
+<li><span>The list of users on a client account<small>To find the owner's name and email.</small></span></li>
+<li><span>Signing in as a client's owner<small>To read campaigns, budgets, Marketplace totals and source settings.</small></span></li></ul></div>
+<div class="card"><span class="chip c-warn">Reachable, Not Used By The App</span><ul class="bul warn">
+<li><span>Totals for any other AM's accounts<small>Likely. One settings field changes the AM number.</small></span></li>
+<li><span>Lead records in a client's portal<small>Likely, untested. "Log in as" gives the client's own view.</small></span></li>
+<li><span>Changing budgets, bids or campaign status as the client<small>Likely, untested. The app refuses these while the bid switch is off.</small></span></li></ul></div>
+</div>
+<p class="small muted">The gap between the two boxes is the exposure. It exists for every admin login, with or without this app. The "likely" items were not tested, and they should stay untested unless someone approves a check.</p>
+
+<div class="subcap">What Ends Up On The Mac, And How Each Piece Is Protected</div>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>What</th><th>Where</th><th>Protection</th></tr></thead>
+<tbody>
+<tr><td>GOAL sign-in, good for 12 hours</td><td>App data folder</td><td><span class="chip c-ok">Encrypted</span></td></tr>
+<tr><td>Pace data: account and campaign names, budgets, today's numbers, up to 45 days of daily logs, source stats, bid multipliers, alerts</td><td>App data folder</td><td><span class="chip c-ok">Encrypted</span></td></tr>
+<tr><td>Account owner first name and email, per account</td><td>App data folder</td><td><span class="chip c-ok">Encrypted</span></td></tr>
+<tr><td>CRM caches: Close records, Fathom meeting notes, Notion notes, calendar, connections. Old cache files are never deleted.</td><td>App data folder</td><td><span class="chip c-ok">Encrypted</span></td></tr>
+<tr><td>Daily CSV of yesterday's numbers, with account and campaign names. On by default.</td><td>Downloads/GOAL Pace</td><td><span class="chip c-warn">Plain File</span></td></tr>
+<tr><td>App log: search terms, matched account names, the start of Ask questions</td><td>The Mac's Logs folder</td><td><span class="chip c-warn">Plain File</span></td></tr>
+<tr><td>Account names and CRM record IDs, in a config file and in cache file names</td><td>Project folder</td><td><span class="chip c-warn">Plain</span></td></tr>
+<tr><td>API keys for Close, Fathom, Anthropic and TypeSafe, plus the encryption key</td><td>A settings file in the project folder</td><td><span class="chip c-bad">Plain Text</span></td></tr>
+</tbody></table></div>
+<div class="callout"><b>The last row matters most.</b><span>Those keys do not expire in 12 hours, and a Close key opens the CRM. Anyone who copies the whole project folder gets the keys and can unlock the encrypted files. Disk encryption (FileVault) is on for the Mac it runs on today, which protects all of it if the laptop is lost while locked.</span></div>
+
+<div class="subcap">What Was Said In Slack, And What The Code Shows</div>
+<p class="small muted">The thread happened before anyone had read how the app works. These are the points that need correcting.</p>
+<div class="card" style="gap:0">
+<div class="vs vh"><span class="cap">Said In The Thread</span><span class="cap">What Is True</span></div>
+<div class="vs"><q>"It figured out a way to extract a bearer API. I didn't ask it to, it came up with this approach."</q><p><b>Nothing was cracked.</b> GOAL's admin site keeps the sign-in in the browser page, where any extension allowed on that page can read it. Croissant v2.9.2 already did this, and the new app reuses the method.</p></div>
+<div class="vs"><q>"Bearer API token." "Unique API key."</q><p><b>It is the AM's own login session,</b> good for 12 hours. GOAL did not issue it to an app, and it stops working when it expires.</p></div>
+<div class="vs"><q>"One-time setup. Run a command in the console and paste the token into settings."</q><p><b>That was the fallback.</b> The normal route is the GOAL Connector, with no console and no copying. It is also not one-time, because the sign-in expires every 12 hours and the connector passes along the new one.</p></div>
+<div class="vs"><q>"It only pulls the accounts tied to the logged-in user."</q><p><b>The app limits itself. The sign-in does not.</b> The app asks for accounts managed by AM number X, taken from the sign-in. A settings field lets you type a different number.</p></div>
+<div class="vs"><q>"Pulls data on all the AMs' accounts in real time."</q><p><b>One AM's accounts</b> per copy of the app, checked every 5 minutes by default.</p></div>
+<div class="vs"><q>"No PII is exposed in the app."</q><p><b>True for consumer data.</b> The app keeps each account owner's first name and email. And the sign-in it holds could reach lead records if misused outside the app.</p></div>
+<div class="vs"><q>"A rep would have to build out their own feature set to get that."</q><p><b>True, and it is not hard.</b> A rep with an admin login and an AI coding tool could do it in an afternoon without this app.</p></div>
+<div class="vs"><q>"It requires the app running alongside a custom Chrome extension."</q><p><b>The app needs both. A person misusing an admin login needs neither.</b></p></div>
+<div class="vs"><q>"The other tool uses Claude in Chrome and computer use, with no API involved."</q><p><b>Croissant does use the API.</b> The v2.9.2 team build calls GOAL's API directly with the admin sign-in. A separate tool that clicks through pages would be different.</p></div>
+<div class="vs"><q>"This can extract the same reporting data and build the report without any export."</q><p><b>Not yet.</b> Pace pulls pace data today. The 10 to 15 reporting exports are not built.</p></div>
+<div class="vs"><q>"If we had a secure API from GOAL it would be easier and safer."</q><p><b>Agreed.</b> It is the best fix on this page.</p></div>
+</div>
+</div></section>
+
+<section class="sec" id="risks"><div class="wrap">
+<div class="head"><h2>Three Risk Scenarios.<span>What Each Person Needs In The Real World.</span></h2>
+<p>Placement on the grid is a judgment from the code review, not a measurement.</p></div>
+<div class="risk">
+<div class="card" style="gap:14px">
+<div class="matrix" role="img" aria-label="Risk grid. Scenarios 1 and 2b are low likelihood and high impact. Scenario 2a is medium likelihood and high impact. Scenario 3 is high likelihood and low impact.">
+<span class="ax">High impact</span><div class="cell t2"><span class="mk">1</span><span class="mk">2b</span></div><div class="cell t3"><span class="mk">2a</span></div><div class="cell t3"></div>
+<span class="ax">Medium</span><div class="cell t1"></div><div class="cell t2"></div><div class="cell t3"></div>
+<span class="ax">Low impact</span><div class="cell t1"></div><div class="cell t1"></div><div class="cell t2"><span class="mk">3</span></div>
+<span class="ax"></span><span class="ax">Unlikely</span><span class="ax">Possible</span><span class="ax">Likely</span>
+</div>
+<p class="small muted">Rows show impact. Columns show likelihood.</p>
+</div>
+<ul class="legend">
+<li><span class="mk">1</span><span><b>An outside bad actor.</b> Needs a targeted attack on one employee. The app adds a second copy of the sign-in and data on disk, and a local service.</span></li>
+<li><span class="mk">2a</span><span><b>An insider with their own admin login.</b> Needs nothing from this app. The app adds speed and a local history.</span></li>
+<li><span class="mk">2b</span><span><b>An insider on a colleague's Mac.</b> Needs a few minutes on an unlocked laptop. The app adds a tidy copy to take.</span></li>
+<li><span class="mk">3</span><span><b>A user who is just poking around.</b> Most likely, and mostly harmless. One click can change GOAL, and it is off.</span></li>
+</ul>
+</div>
+
+<div class="card scn">
+<div class="scn-h"><span class="mk">1</span><h3>An Outside Bad Actor After Client Data</h3><span class="chip c-ok">Likelihood Low</span><span class="chip c-bad">Impact High</span></div>
+<p>They start with no GOAL login and no access to the AM's Mac. The app gives them no direct way in from the internet. It listens only on the Mac it runs on, and its GOAL routes refuse requests from other websites. Those checks stop web pages. They do not stop a program already running on the Mac. So they need one of six routes.</p>
+<details class="more"><summary>The six routes, what each needs and what it gets</summary>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>Route</th><th>What They Need</th><th>What They Get</th></tr></thead>
+<tbody>
+<tr><td>An AM's Mac, unlocked or with its password</td><td>The laptop in hand and the Mac password. Then about ten minutes and some scripting skill.</td><td>Everything stored on the Mac, including the long-lived keys. They could also open Chrome, where the AM is already logged in.</td></tr>
+<tr><td>A malicious Chrome extension or malware</td><td>The AM has to install it, so it takes a convincing fake and working malicious software.</td><td>The GOAL sign-in, straight from the GOAL page, renewed at every login. This works with or without the app. With the app installed, a program on the Mac can also read the keys file, ask the app for its data, or pose as the app to the connector.</td></tr>
+<tr><td>A booby-trapped web page</td><td>The AM opens a malicious page while the app is running. It takes high skill and a technique called DNS rebinding.</td><td>Possibly the CRM side's account list and account pages, because four older routes do not check where a request comes from. The GOAL routes do. Untested.</td></tr>
+<tr><td>Tricking the AM into handing over the sign-in</td><td>A believable message, such as a request to run something in the console and send the result. No software.</td><td>A 12-hour sign-in that may work from anywhere. The app's paste-in setup step teaches this habit.</td></tr>
+<tr><td>A poisoned software update</td><td>High skill, and not aimed at GOAL in particular. A bad update to an open-source part could read local files.</td><td>The local files and keys.</td></tr>
+<tr><td>The plain files</td><td>Access to the Downloads or Logs folder, or a cloud backup of them.</td><td>Account names, budgets, spend, leads and calls by day, plus search terms.</td></tr>
+</tbody></table></div></details>
+<p class="muted">With a live sign-in the damage goes beyond this app's data, because "log in as" would work for any client.</p>
+</div>
+
+<div class="card scn">
+<div class="scn-h"><span class="mk">2</span><h3>An Internal Bad Actor After Client Data</h3><span class="chip c-warn">Likelihood Low To Medium</span><span class="chip c-bad">Impact High</span></div>
+<div class="grid2" style="gap:28px">
+<div style="display:grid;gap:10px;align-content:start"><span class="cap">2a. With Their Own Admin Login</span><p>They need nothing from this app. The steps are to log in, then use the portal or a script. They can already open clients, export reports and log in as a client. An AI coding tool turns that into a bulk pull in an afternoon, and Croissant shows the path is known.</p><p class="muted">What is missing is a record. Unless GOAL logs bulk reads and "log in as" per admin user, and someone reviews the logs, nobody would notice.</p></div>
+<div style="display:grid;gap:10px;align-content:start"><span class="cap">2b. On A Colleague's Mac</span><p>They need a colleague's unlocked Mac for a few minutes. They can read and export from the app, copy the project folder to unlock later, or copy the sign-in from the open GOAL tab. Anything they then do in GOAL looks like the colleague did it.</p><p class="muted">An AM who leaves is a related case. The sign-in dies within 12 hours. The local history, CSV files, cached CRM notes, the Close and Fathom keys and the Notion and email connections stay on that Mac until removed or revoked.</p></div>
+</div>
+</div>
+
+<div class="card scn">
+<div class="scn-h"><span class="mk">3</span><h3>An Internal User Who Is Just Poking Around</h3><span class="chip c-bad">Likelihood High</span><span class="chip c-ok">Impact Low</span></div>
+<p>No bad intent. Most outcomes are small, and only one click touches GOAL: turning on Bid Changes and pressing Apply. It is off by default, has a confirm step, and cannot run today.</p>
+<details class="more"><summary>Nine things they might click, and what happens</summary>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>What They Click</th><th>What Happens</th><th>How Bad</th></tr></thead>
+<tbody>
+<tr><td>Turn on Bid Changes and press Apply</td><td>Real bid multipliers go up in GOAL, so the client's money spends faster.</td><td>Off by default, with a confirm step. Raises only, 10% per change, never more than 25 points at once, never above 300, and a 7-day wait per source. Every change is logged. It cannot run today because no save format has been learned. That changes once someone saves a multiplier by hand in GOAL with the connector on.</td></tr>
+<tr><td>Type a different Account Manager ID</td><td>The app shows another AM's accounts and raises their alerts.</td><td>Confusing, and it shows a book that is not theirs.</td></tr>
+<tr><td>Type a budget by hand, or mute an alert</td><td>Only the app's view changes, for today. Nothing changes in GOAL.</td><td>A real pace problem could go unseen for a day.</td></tr>
+<tr><td>Paste a Slack webhook for a busy channel</td><td>Account names and spend alerts post there.</td><td>Internal oversharing.</td></tr>
+<tr><td>Paste the sign-in somewhere else too</td><td>It ends up in Slack, a doc or a chatbot.</td><td>A 12-hour pass to their admin login.</td></tr>
+<tr><td>Ask questions in the Ask box</td><td>Account names, numbers and sometimes contact details go to Anthropic.</td><td>Depends on what GOAL considers acceptable.</td></tr>
+<tr><td>Click Disconnect And Clear</td><td>Local history is erased after a confirm step.</td><td>It rebuilds. The bid log is lost, and with it the 7-day wait on recent bid changes.</td></tr>
+<tr><td>Set checks to every 2 minutes, or install it on several Macs</td><td>Each copy checks GOAL on its timer and signs in as account owners.</td><td>More load on GOAL's API. The first live session made 445 requests with no errors.</td></tr>
+<tr><td>Load the connector in Developer mode</td><td>AMs get used to loading extensions from a folder.</td><td>A habit that makes the malicious-extension route easier.</td></tr>
+</tbody></table></div></details>
+<p class="muted">One unknown belongs here. The app signs in as client owners. If GOAL shows clients a last-login time or sends a login notice, clients may see activity that was not theirs.</p>
+</div>
+</div></section>
+
+<section class="sec" id="fixes"><div class="wrap">
+<div class="head"><h2>Reducing The Risk.<span>Without Making The App Harder To Use.</span></h2></div>
+<div class="card" style="gap:16px"><h3>Already In Place</h3>
+<ul class="bul ok grid2" style="gap:10px 28px">
+<li>Listens only on the Mac it runs on. Its GOAL routes refuse requests from other websites.</li>
+<li>Takes a sign-in only from the first connector that paired with it, or from its own settings page.</li>
+<li>The part that talks to GOAL can reach GOAL's API and Slack, and nothing else.</li>
+<li>While the bid switch is off, every change to GOAL is refused. The switch is off by default.</li>
+<li>The sign-in, Pace data, CRM caches and connections are encrypted on disk.</li>
+<li>Owner sessions are never written to disk.</li>
+<li>No lead-level data is requested.</li>
+<li>A sample-data mode with made-up agencies, so a demo needs no GOAL login.</li>
+</ul></div>
+<div class="subcap">Changes To The App</div>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th></th><th>Change</th><th>What It Fixes</th><th>Extra Steps For The User</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td>Add the website check to the four older CRM routes.</td><td>The booby-trapped web page route.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">2</td><td>Remove the paste-in sign-in. Connector only.</td><td>The console habit and the easiest phishing route.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">3</td><td>Move the encryption key and the Close, Fathom and AI keys into the Mac's Keychain.</td><td>Copying the folder no longer gives a readable copy.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">4</td><td>Stop saving the GOAL sign-in to disk. Hold it in memory.</td><td>Nothing to steal from the files.</td><td><span class="chip c-ok">None In Normal Use</span></td></tr>
+<tr><td class="n">5</td><td>Remove the Account Manager ID box, or put it behind a manager setting.</td><td>One-field access to another AM's accounts.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">6</td><td>Turn off the daily CSV by default and keep Export as a button. Keep names and questions out of the app log. Delete old cache files.</td><td>Plain files, and data that never expires.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">7</td><td>Make the connector and the app prove who they are to each other.</td><td>A program on the Mac posing as either one.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">8</td><td>Ship a read-only edition with bid changes removed until GOAL approves them. When they return, enforce the multiplier-only rule in the server too.</td><td>The one click that changes GOAL.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">9</td><td>Cap GOAL requests per day and add an activity log that can be exported.</td><td>API load. It also gives engineering something to review.</td><td><span class="chip c-ok">None</span></td></tr>
+<tr><td class="n">10</td><td>Publish the connector privately through Google Workspace so Chrome installs it.</td><td>No Developer mode and no folder to tamper with.</td><td><span class="chip c-blue">Fewer Than Today</span></td></tr>
+<tr><td class="n">11</td><td>Leave GOAL data out of Ask by default, or say on screen what is sent.</td><td>Client data going to an AI service unnoticed.</td><td><span class="chip c-ok">None</span></td></tr>
+</tbody></table></div>
+<p class="small muted">Items 1 to 7 are roughly two days of work and change nothing about how the app is used.</p>
+<div class="grid2">
+<div class="card"><h3>Company Settings, Set Once</h3><ul class="bul">
+<li>Disk encryption and auto-lock required on every Mac that runs it. Work Macs only.</li>
+<li>A Chrome extension allow-list. This is the best single protection for the GOAL sign-in, with or without this app.</li>
+<li>An offboarding checklist that revokes the Close, Fathom and AI keys and the Notion and email connections, and removes the app's folder.</li>
+<li>An agreed position on which AI services may see client data.</li></ul></div>
+<div class="card blue"><h3>GOAL Platform Changes</h3><p class="muted">These need engineering, and they help with every tool.</p><ul class="bul">
+<li>A read-only reporting API with a key per user, limited to that AM's accounts, that can be revoked and rate-limited.</li>
+<li>An admin-side way to read budgets, so reads never need "log in as".</li>
+<li>A log of every "log in as" and of bulk reads per admin user, with a review.</li>
+<li>Keep the admin sign-in out of the page's readable storage, shorten its life and cancel it on sign-out.</li>
+<li>Limit what each admin role can see through the API.</li></ul></div>
+</div>
+<div class="subcap">The Ideas From The Thread, And How Each One Holds Up</div>
+<div class="grid2">
+<div class="card"><span class="chip c-ok">Best Option</span><h3>A Secure API From GOAL</h3><p>A read-only key per user, limited to that AM's accounts. The app would stop touching the admin sign-in and stop using "log in as".</p></div>
+<div class="card"><span class="chip c-warn">Moves The Problem</span><h3>A Middleware Layer</h3><p>Something still has to sign in to GOAL. A server that does it holds an always-on pass to every account and becomes the target. It only helps when engineering runs it with a read-only account, and at that point it is the secure API.</p></div>
+<div class="card"><span class="chip c-blue">Fits Reporting</span><h3>Scheduled Exports</h3><p>GOAL sends exports to a folder or inbox and the tool reads the files, so the tool holds no GOAL pass at all. The data is a day old. That suits the 10 to 15 reporting exports and does not suit live pace alerts.</p></div>
+<div class="card"><span class="chip c-mute">Later</span><h3>Slack-Triggered Reports</h3><p>These need a bot with data access running on a server, which is the same question as middleware. They make sense once there is an approved data source.</p></div>
+</div>
+</div></section>
+
+<section class="sec" id="next"><div class="wrap">
+<div class="head"><h2>Where It Adds Value.<span>And What Comes Next.</span></h2></div>
+<div class="card" style="gap:16px"><h3>Value Today</h3>
+<ul class="bul grid2" style="gap:10px 28px">
+<li>Same-day warning when an account overspends, underspends or stops converting, across the whole book.</li>
+<li>A morning briefing for the AM, plus a daily report of yesterday's numbers.</li>
+<li>One page per account that joins GOAL pace with CRM notes, meetings and email.</li>
+<li>A working prototype of alerts and reporting that could live inside the product. It can be shown on sample data, with no GOAL login and no real client names.</li>
+</ul></div>
+<div class="subcap">Still To Find Out, And Who Can Answer</div>
+<div class="scroll"><table class="tbl stack">
+<thead><tr><th>Question</th><th>Who Can Answer</th></tr></thead>
+<tbody>
+<tr><td>Does GOAL log "log in as" and bulk API reads per admin user?</td><td>Engineering</td></tr>
+<tr><td>Does signing out cancel the sign-in before the 12 hours are up? Is it tied to a device or network?</td><td>Engineering</td></tr>
+<tr><td>Do clients see, or get notified of, owner sign-ins made by admins?</td><td>Engineering</td></tr>
+<tr><td>Can every admin login see every client through the API?</td><td>Engineering, or a check of the Clients filter</td></tr>
+<tr><td>Can another Chrome extension or a web page read the app's local screens?</td><td>A local test that does not touch GOAL</td></tr>
+<tr><td>Who runs Croissant today, and which version?</td><td>Leadership</td></tr>
+<tr><td>May the app run on personal Macs?</td><td>Leadership</td></tr>
+<tr><td>Which AI services may see client data?</td><td>Leadership</td></tr>
+</tbody></table></div>
+<div class="subcap">Suggested Next Steps</div>
+<ol class="next">
+<li><span><b>Keep it to one user</b> with bid changes off, as it is now.</span></li>
+<li><span><b>Make app changes 1 to 7.</b> About two days, with no change for the user.</span></li>
+<li><span><b>Decide on Croissant,</b> which uses the same method.</span></li>
+<li><span><b>Ask for the read-only API</b> and the "log in as" log when the time is right, and demo on sample data.</span></li>
+</ol>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+<span>Built from the ASM CRM Beta code and manuals and the GOAL Data Access Review of 11 Nov 2026. The review was based on a read of the app's code, an independent check of that read, and one live test session. Items marked likely or untested were not tried against GOAL.</span>
+<span>Updated where the app has changed since the review: it no longer drafts anything to clients. Agency names in the illustration are made up.</span>
+</div></footer>
+<script>
+for(const c of document.querySelectorAll('.stack td')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').tHead.rows[0].cells[i]?.textContent||''}
+</script>
+</body>
+</html>
